@@ -1,12 +1,14 @@
 package com.example.ui.screens.auth;
 
+import com.example.ui.components.RoundedButton;
+import com.example.ui.components.RoundedPasswordField;
+import com.example.ui.components.RoundedTextField;
+import com.example.ui.components.UIColors;
+
 import javax.swing.*;
 import java.awt.*;
 
-
-
-
-public class Login extends JFrame{
+public class Login extends JFrame {
 
     public Login() {
 
@@ -17,17 +19,15 @@ public class Login extends JFrame{
         setResizable(false);
 
         JPanel leftPanel = new JPanel();
-        leftPanel.setBackground(new Color(24, 24, 24));
+        leftPanel.setBackground(UIColors.BACKGROUND);
 
         JPanel rightPanel = new JPanel();
-        rightPanel.setBackground(new Color(35, 35, 35));
+        rightPanel.setBackground(UIColors.CARD);
 
         JSplitPane splitPane = new JSplitPane(
-
                 JSplitPane.HORIZONTAL_SPLIT,
                 leftPanel,
                 rightPanel
-
         );
 
         splitPane.setDividerLocation(400);
@@ -43,21 +43,23 @@ public class Login extends JFrame{
 
         JLabel title = new JLabel("Welcome Back");
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        title.setForeground(Color.WHITE);
+        title.setForeground(UIColors.FOREGROUND);
 
         JLabel usernameLabel = new JLabel("Username");
-        usernameLabel.setForeground(Color.WHITE);
+        usernameLabel.setForeground(UIColors.MUTED_FOREGROUND);
 
-        JTextField usernameInput = new JTextField();
-        usernameInput.setPreferredSize(new Dimension(0, 40));
+        RoundedTextField usernameInput = new RoundedTextField(20);
+        usernameInput.setPlaceholder("Enter your username");
+        usernameInput.setPreferredSize(new Dimension(200, 50));
 
         JLabel passwordLabel = new JLabel("Password");
-        passwordLabel.setForeground(Color.WHITE);
+        passwordLabel.setForeground(UIColors.MUTED_FOREGROUND);
 
-        JTextField passwordInput = new JTextField();
-        passwordInput.setPreferredSize(new Dimension(0, 40));
+        RoundedPasswordField passwordInput = new RoundedPasswordField(20);
+        passwordInput.setPlaceholder("Enter your password");
+        passwordInput.setPreferredSize(new Dimension(200, 50));
 
-        JButton loginButton = new JButton("Login");
+        RoundedButton loginButton = new RoundedButton("Login", RoundedButton.Variant.PRIMARY);
         loginButton.setPreferredSize(new Dimension(0, 45));
 
         gbc.gridx = 0;
@@ -78,12 +80,13 @@ public class Login extends JFrame{
         rightPanel.add(passwordInput, gbc);
 
         gbc.gridy = 5;
+        gbc.insets = new Insets(20, 20, 10, 20);
         rightPanel.add(loginButton, gbc);
 
         setContentPane(splitPane);
     }
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new Login().setVisible(true));
+    }
 }
-
-
-
