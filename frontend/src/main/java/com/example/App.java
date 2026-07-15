@@ -1,13 +1,20 @@
 package com.example;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
-    public static void main( String[] args )
-    {
-        System.out.println( "Hello World!" );
+import com.example.ui.screens.auth.Login;
+
+import javax.swing.SwingUtilities;
+
+
+
+public class App {
+
+    public static void main(String[] args) {
+
+
+        SwingUtilities.invokeLater(() -> {
+            new Login().setVisible(true);
+        });
+
     }
+
 }
