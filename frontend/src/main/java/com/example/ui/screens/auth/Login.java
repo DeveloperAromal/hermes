@@ -4,6 +4,7 @@ import com.example.ui.components.RoundedButton;
 import com.example.ui.components.RoundedPasswordField;
 import com.example.ui.components.RoundedTextField;
 import com.example.ui.components.UIColors;
+import com.example.ui.screens.dashboard.MainDashboard;
 
 import javax.swing.*;
 import java.awt.*;
@@ -61,6 +62,11 @@ public class Login extends JFrame {
 
         RoundedButton loginButton = new RoundedButton("Login", RoundedButton.Variant.PRIMARY);
         loginButton.setPreferredSize(new Dimension(0, 45));
+
+        loginButton.addActionListener(e -> {
+            dispose();
+            new MainDashboard().setVisible(true);
+        });
 
         gbc.gridx = 0;
         gbc.gridy = 0;
