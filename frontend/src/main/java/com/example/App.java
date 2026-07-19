@@ -1,8 +1,8 @@
 package com.example;
 
-import com.example.ui.screens.auth.Login;
-
 import javax.swing.SwingUtilities;
+
+import com.example.screens.auth.Login;
 
 
 

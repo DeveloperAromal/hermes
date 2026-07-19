@@ -40,4 +40,8 @@ public class UIColors {
     public static final Color ACCENT          = new Color(0xFA, 0xFA, 0xFA);
 
     public static final int RADIUS = 10; // shadcn ~0.5rem corner radius
+
+    public static final Color SIDEBAR_HOVER   = new Color(0xFA, 0xFA, 0xFA, 14);
+    public static final Color SIDEBAR_ACTIVE  = new Color(0xFA, 0xFA, 0xFA, 26);
+ 
 }
