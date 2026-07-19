@@ -1,10 +1,10 @@
-package com.example.ui.screens.auth;
+package com.example.screens.auth;
 
+import com.example.screens.dashboard.MainDashboard;
 import com.example.ui.components.RoundedButton;
 import com.example.ui.components.RoundedPasswordField;
 import com.example.ui.components.RoundedTextField;
 import com.example.ui.components.UIColors;
-import com.example.ui.screens.dashboard.MainDashboard;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,11 +1,12 @@
-package com.example.ui.screens.dashboard;
+package com.example.screens.dashboard;
 
+import com.example.ui.components.Icons;
+import com.example.ui.components.ModernScrollBarUI;
+import com.example.ui.components.NavRow;
 import com.example.ui.components.UIColors;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -37,23 +38,31 @@ public class Sidebar extends JPanel {
 
     private final Consumer<String> onNavigate;
     private final JPanel itemsPanel;
+    private NavRow activeRow;
 
     public Sidebar(Consumer<String> onNavigate) {
         this.onNavigate = onNavigate;
 
-        setPreferredSize(new Dimension(300, 1000));
+        setPreferredSize(new Dimension(280, 1000));
         setLayout(new BorderLayout());
         setBackground(UIColors.BACKGROUND);
+
+        add(buildHeader(), BorderLayout.NORTH);
 
         itemsPanel = new JPanel();
         itemsPanel.setLayout(new BoxLayout(itemsPanel, BoxLayout.Y_AXIS));
         itemsPanel.setBackground(UIColors.BACKGROUND);
+        itemsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         JScrollPane scrollPane = new JScrollPane(itemsPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.getViewport().setBackground(UIColors.BACKGROUND);
+
+        scrollPane.getVerticalScrollBar().setUI(new ModernScrollBarUI());
+        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(8, 0));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scrollPane, BorderLayout.CENTER);
 
@@ -64,98 +73,78 @@ public class Sidebar extends JPanel {
         this(route -> System.out.println("Navigate to: " + route));
     }
 
+    private JPanel buildHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(UIColors.BACKGROUND);
+        header.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, UIColors.BORDER),
+                BorderFactory.createEmptyBorder(18, 20, 18, 20)
+        ));
+
+        JLabel brand = new JLabel("Malscope");
+        brand.setAlignmentX(Component.LEFT_ALIGNMENT);
+        brand.setForeground(UIColors.FOREGROUND);
+        brand.setFont(brand.getFont().deriveFont(Font.BOLD, 17f));
+
+        JLabel subtitle = new JLabel("Malware Analysis Console");
+        subtitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+        subtitle.setForeground(UIColors.MUTED_FOREGROUND);
+        subtitle.setFont(subtitle.getFont().deriveFont(11f));
+
+        JPanel textStack = new JPanel();
+        textStack.setOpaque(false);
+        textStack.setLayout(new BoxLayout(textStack, BoxLayout.Y_AXIS));
+        textStack.add(brand);
+        textStack.add(Box.createVerticalStrut(3));
+        textStack.add(subtitle);
+
+        header.add(textStack, BorderLayout.WEST);
+        return header;
+    }
+
     private void buildNavItems(List<NavItem> items, JPanel container, int depth) {
         for (NavItem item : items) {
-            container.add(createNavRow(item, depth));
+            NavRow row = new NavRow(Icons.kindForLiteral(item.icon), item.label, depth, item.hasChildren());
+            container.add(wrapRow(row, depth));
 
             if (item.hasChildren()) {
                 JPanel childWrapper = new JPanel();
                 childWrapper.setLayout(new BoxLayout(childWrapper, BoxLayout.Y_AXIS));
-                childWrapper.setBackground(UIColors.BACKGROUND);
+                childWrapper.setOpaque(false);
                 childWrapper.setVisible(false);
 
                 buildNavItems(item.children, childWrapper, depth + 1);
                 container.add(childWrapper);
 
-                JPanel finalRow = (JPanel) container.getComponent(container.getComponentCount() - 2);
-                finalRow.addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        childWrapper.setVisible(!childWrapper.isVisible());
-                        childWrapper.revalidate();
-                        childWrapper.repaint();
+                row.onClick(() -> {
+                    boolean expanding = !childWrapper.isVisible();
+                    childWrapper.setVisible(expanding);
+                    row.setExpanded(expanding);
+                    childWrapper.revalidate();
+                    childWrapper.repaint();
+                });
+            } else {
+                row.onClick(() -> {
+                    if (activeRow != null) {
+                        activeRow.setActive(false);
                     }
+                    row.setActive(true);
+                    activeRow = row;
+                    onNavigate.accept(item.route);
                 });
             }
         }
     }
 
-    private JPanel createNavRow(NavItem item, int depth) {
-        JPanel row = new JPanel(new BorderLayout());
-        row.setBackground(UIColors.BACKGROUND);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        row.setBorder(BorderFactory.createEmptyBorder(6, 16 + depth * 20, 6, 16));
-        row.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-        JLabel iconLabel = new JLabel(iconGlyphFor(item.icon));
-        iconLabel.setFont(iconLabel.getFont().deriveFont(depth == 0 ? 16f : 13f));
-        iconLabel.setForeground(Color.LIGHT_GRAY);
-        iconLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
-
-        JLabel textLabel = new JLabel(item.label);
-        textLabel.setForeground(depth == 0 ? Color.WHITE : Color.LIGHT_GRAY);
-        textLabel.setFont(textLabel.getFont().deriveFont(depth == 0 ? Font.BOLD : Font.PLAIN, depth == 0 ? 14f : 13f));
-
-        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        left.setOpaque(false);
-        left.add(iconLabel);
-        left.add(textLabel);
-
-        row.add(left, BorderLayout.WEST);
-
-        if (item.hasChildren()) {
-            JLabel chevron = new JLabel("\u25BE");
-            chevron.setForeground(Color.GRAY);
-            row.add(chevron, BorderLayout.EAST);
-        }
-
-        if (!item.hasChildren()) {
-            row.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    onNavigate.accept(item.route);
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    row.setBackground(UIColors.CARD);
-                }
-
-                @Override
-                public void mouseExited(MouseEvent e) {
-                    row.setBackground(UIColors.BACKGROUND);
-                }
-            });
-        }
-
-        return row;
-    }
-
-    private String iconGlyphFor(String literal) {
-        if (literal == null) return "•";
-        if (literal.contains("dashboard")) return "▦";
-        if (literal.contains("file-upload")) return "⬆";
-        if (literal.contains("format-list")) return "☰";
-        if (literal.contains("magnify")) return "🔍";
-        if (literal.contains("file-tree")) return "🌳";
-        if (literal.contains("lan")) return "🌐";
-        if (literal.contains("robot")) return "🤖";
-        if (literal.contains("shield")) return "🛡";
-        if (literal.contains("file-document")) return "📄";
-        if (literal.contains("text-box")) return "📋";
-        if (literal.contains("account")) return "👤";
-        if (literal.contains("cog")) return "⚙";
-        return "•";
+    /** Adds outer margin + depth-based indentation around a NavRow pill. */
+    private JPanel wrapRow(NavRow row, int depth) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setOpaque(false);
+        wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
+        wrapper.setBorder(BorderFactory.createEmptyBorder(2, 10 + depth * 18, 2, 10));
+        wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        wrapper.add(row, BorderLayout.CENTER);
+        return wrapper;
     }
 
     private List<NavItem> loadTabs() {
@@ -184,5 +173,23 @@ public class Sidebar extends JPanel {
             new NavItem("user-management", "User Management", "mdi2a-account-multiple-outline", "/admin/users"),
             new NavItem("settings", "Settings", "mdi2c-cog-outline", "/settings")
         );
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Sidebar Preview");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(1000, 760);
+            frame.setLocationRelativeTo(null);
+            frame.setLayout(new BorderLayout());
+
+            frame.add(new Sidebar(), BorderLayout.WEST);
+
+            JPanel content = new JPanel();
+            content.setBackground(UIColors.CARD);
+            frame.add(content, BorderLayout.CENTER);
+
+            frame.setVisible(true);
+        });
     }
 }

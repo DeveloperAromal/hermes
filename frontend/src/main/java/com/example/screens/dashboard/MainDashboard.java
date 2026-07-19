@@ -1,4 +1,4 @@
-package com.example.ui.screens.dashboard;
+package com.example.screens.dashboard;
 
 import javax.swing.*;
 import com.example.ui.components.UIColors;
